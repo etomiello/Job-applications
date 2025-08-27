@@ -44,3 +44,22 @@ class ApplicationOut(BaseModel):
 @router.post("/applications", response_model=ApplicationOut) #@router Defines a new POST route at /applications---- response_model Automatically formats the response using ApplicationOut (adds id, hides internal fields)
 def create_application_route(application: ApplicationCreate, db: Session = Depends(get_db)): #FastAPI will run this function when the route is called--- application create, FastAPI will parse the request body using this Pydantic model -- db Injects a SQLAlchemy DB session using your helper function 
     return crud.create_application(db, application) #Calls the logic you wrote in crud.py and returns the result
+
+@router.get("/applications", response_model=List[ApplicationOut])
+def read_applications_route(db: Session = Depends(get_db)):
+    return crud.get_all_applications(db)
+
+
+@router.get("/applications/{id}", response_model=ApplicationOut)
+def read_application_by_id_route(id: int, db: Session = Depends(get_db)):
+    application = crud.get_application_by_id(db, id)
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return application
+
+@router.put("/applications/{id}", response_model=ApplicationOut)
+def update_application_route(id: int, application: ApplicationCreate, db: Session = Depends(get_db)):
+    updated_application = crud.update_application(db, id, application)
+    if not updated_application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return updated_application
