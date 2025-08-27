@@ -4,6 +4,8 @@ from typing import Optional, List
 from sqlalchemy.orm import Session
 from app.database import SessionLocal
 from app import models, crud
+from datetime import date
+
 
 router = APIRouter()
 
@@ -19,17 +21,24 @@ def get_db():   #This is FastAPI’s recommended pattern for managing DB session
 class ApplicationCreate(BaseModel):
     company_name: str
     job_title: str
-    application_date: str  # ISO format date as string
+    application_date: date
     status: str
-    last_update: str       # ISO format date as string
+    last_update: date      
     resume_url: Optional[str] = None
 
-# Response model Not sure if thisis needed but could be used later 
-class ApplicationOut(ApplicationCreate):
+
+class ApplicationOut(BaseModel):
     id: int
+    company_name: str
+    job_title: str
+    application_date: date
+    status: str
+    last_update: date
+    resume_url: Optional[str] = None
 
     class Config:
-        orm_mode = True  # This lets Pydantic work with SQLAlchemy objects
+        from_attributes = True  # For Pydantic v2, replaces orm_mode
+
 
 
 @router.post("/applications", response_model=ApplicationOut) #@router Defines a new POST route at /applications---- response_model Automatically formats the response using ApplicationOut (adds id, hides internal fields)
