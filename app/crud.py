@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app import models
 
 def create_application(db: Session, application_data):
@@ -24,3 +25,17 @@ def update_application(db: Session, application_id: int, application_data):
     db.commit()
     db.refresh(application)
     return application
+
+def delete_application_by_id(db: Session, application_id: int):
+    application = db.query(models.Application).filter(models.Application.id == application_id).first()
+    if not application:
+        return None
+    db.delete(application)
+    db.commit()
+    return application
+
+def get_status_summary(db: Session):
+    results = db.query(models.Application.status, func.count(models.Application.id)) \
+                .group_by(models.Application.status) \
+                .all()
+    return {status: count for status, count in results}

@@ -63,3 +63,14 @@ def update_application_route(id: int, application: ApplicationCreate, db: Sessio
     if not updated_application:
         raise HTTPException(status_code=404, detail="Application not found")
     return updated_application
+
+@router.delete("/applications/{id}", response_model=ApplicationOut)
+def delete_route(id: int, db: Session = Depends(get_db)):
+    delete_application = crud.delete_application_by_id(db, id)
+    if not delete_application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    return delete_application
+
+@router.get("/analytics/status-summary")
+def status_summary_route(db: Session = Depends(get_db)):
+    return crud.get_status_summary(db)
