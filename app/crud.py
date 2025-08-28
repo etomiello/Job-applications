@@ -39,3 +39,30 @@ def get_status_summary(db: Session):
                 .group_by(models.Application.status) \
                 .all()
     return {status: count for status, count in results}
+
+def get_average_response_time(db: Session):
+    avg_days = db.query(
+        func.avg(
+            func.date(models.Application.last_update) - func.date(models.Application.application_date)
+        )
+    ).filter(
+        models.Application.last_update != models.Application.application_date
+    ).scalar()
+
+    return {"average_response_time_days": float(avg_days) if avg_days is not None else None}
+
+def search_applications(db: Session, company_name=None, job_title=None, status=None, start_date=None, end_date=None):
+    query = db.query(models.Application)
+
+    if company_name:
+        query = query.filter(models.Application.company_name.ilike(f"%{company_name}%"))
+    if job_title:
+        query = query.filter(models.Application.job_title.ilike(f"%{job_title}%"))
+    if status:
+        query = query.filter(models.Application.status.ilike(f"%{status}%"))
+    if start_date:
+        query = query.filter(models.Application.application_date >= start_date)
+    if end_date:
+        query = query.filter(models.Application.application_date <= end_date)
+
+    return query.all()

@@ -49,6 +49,18 @@ def create_application_route(application: ApplicationCreate, db: Session = Depen
 def read_applications_route(db: Session = Depends(get_db)):
     return crud.get_all_applications(db)
 
+@router.get("/applications/search", response_model=List[ApplicationOut])
+def search_applications(
+    company_name: Optional[str] = None,
+    job_title: Optional[str] = None,
+    status: Optional[str] = None,
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
+    db: Session = Depends(get_db)
+):
+    return crud.search_applications(db, company_name, job_title, status, start_date, end_date)
+
+
 
 @router.get("/applications/{id}", response_model=ApplicationOut)
 def read_application_by_id_route(id: int, db: Session = Depends(get_db)):
@@ -74,3 +86,10 @@ def delete_route(id: int, db: Session = Depends(get_db)):
 @router.get("/analytics/status-summary")
 def status_summary_route(db: Session = Depends(get_db)):
     return crud.get_status_summary(db)
+
+@router.get("/analytics/response-time")
+def response_time_route(db: Session = Depends(get_db)):
+    return crud.get_average_response_time(db)
+
+
+
